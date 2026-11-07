@@ -72,7 +72,7 @@ for (let urlIdx = 0; urlIdx < videoUrls.length; urlIdx++) {
             userData: {
                 videoIndex: urlIdx + 1,
                 totalVideos: videoUrls.length,
-                sessionIndex,
+                sessionIndex: sessionIdx,
                 totalSessions: viewsPerVideo,
                 targetDuration,
                 deviceProfile,
