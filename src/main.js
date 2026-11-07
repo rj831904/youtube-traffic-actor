@@ -226,27 +226,31 @@ const crawler = new PuppeteerCrawler({
             elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
 
             // Periodically check for skip ad buttons, popups, and verify video is still playing
-            await page.evaluate(() => {
-                // Skip ad if available
-                const skipBtn = document.querySelector(
-                    '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, .videoAdUiSkipButton, .ytm-ad-skip-button'
-                );
-                if (skipBtn) skipBtn.click();
+            try {
+                await page.evaluate(() => {
+                    // Skip ad if available
+                    const skipBtn = document.querySelector(
+                        '.ytp-ad-skip-button, .ytp-ad-skip-button-modern, .ytp-skip-ad-button, .videoAdUiSkipButton, .ytm-ad-skip-button'
+                    );
+                    if (skipBtn) skipBtn.click();
 
-                // Close ad overlay banners
-                const closeOverlay = document.querySelector('.ytp-ad-overlay-close-button');
-                if (closeOverlay) closeOverlay.click();
+                    // Close ad overlay banners
+                    const closeOverlay = document.querySelector('.ytp-ad-overlay-close-button');
+                    if (closeOverlay) closeOverlay.click();
 
-                // Dismiss "Are you still watching?" popup
-                const confirmBtn = document.querySelector('ytd-button-renderer[dialog-confirm] button');
-                if (confirmBtn) confirmBtn.click();
+                    // Dismiss "Are you still watching?" popup
+                    const confirmBtn = document.querySelector('ytd-button-renderer[dialog-confirm] button');
+                    if (confirmBtn) confirmBtn.click();
 
-                // Ensure video is playing
-                const v = document.querySelector('video');
-                if (v && v.paused) {
-                    v.play().catch(() => {});
-                }
-            });
+                    // Ensure video is playing
+                    const v = document.querySelector('video');
+                    if (v && v.paused) {
+                        v.play().catch(() => {});
+                    }
+                });
+            } catch {
+                // Ignore transient frame detachments or DOM re-renders during ad/video transitions
+            }
 
             // Perform subtle human-like micro-interactions
             if (enableInteractions && elapsedSeconds - lastInteractionTime >= 15) {
@@ -267,9 +271,9 @@ const crawler = new PuppeteerCrawler({
 
                     // Occasional smooth scroll down and back up
                     if (Math.random() > 0.65) {
-                        await page.evaluate(() => window.scrollBy({ top: 120 + Math.random() * 80, behavior: 'smooth' }));
+                        await page.evaluate(() => window.scrollBy({ top: 120 + Math.random() * 80, behavior: 'smooth' })).catch(() => {});
                         await new Promise((r) => setTimeout(r, 2000));
-                        await page.evaluate(() => window.scrollBy({ top: -120, behavior: 'smooth' }));
+                        await page.evaluate(() => window.scrollBy({ top: -120, behavior: 'smooth' })).catch(() => {});
                     }
                 } catch {
                     // Ignore transient interaction errors
@@ -283,17 +287,27 @@ const crawler = new PuppeteerCrawler({
         }
 
         // Gather video details for reporting
-        const videoInfo = await page.evaluate(() => {
-            const titleEl = document.querySelector('h1.ytd-watch-metadata, #container > h1, .ytm-item-title');
-            const channelEl = document.querySelector('#owner #channel-name a, ytd-channel-name a, .channel-name');
-            const videoEl = document.querySelector('video');
-            return {
-                title: titleEl ? titleEl.innerText.trim() : 'Unknown Title',
-                channel: channelEl ? channelEl.innerText.trim() : 'Unknown Channel',
-                currentTime: videoEl ? Math.round(videoEl.currentTime) : null,
-                duration: videoEl ? Math.round(videoEl.duration) : null,
-            };
-        });
+        let videoInfo = {
+            title: 'YouTube Video',
+            channel: 'Unknown Channel',
+            currentTime: null,
+            duration: null,
+        };
+        try {
+            videoInfo = await page.evaluate(() => {
+                const titleEl = document.querySelector('h1.ytd-watch-metadata, #container > h1, .ytm-item-title');
+                const channelEl = document.querySelector('#owner #channel-name a, ytd-channel-name a, .channel-name');
+                const videoEl = document.querySelector('video');
+                return {
+                    title: titleEl ? titleEl.innerText.trim() : 'YouTube Video',
+                    channel: channelEl ? channelEl.innerText.trim() : 'Unknown Channel',
+                    currentTime: videoEl ? Math.round(videoEl.currentTime) : null,
+                    duration: videoEl ? Math.round(videoEl.duration) : null,
+                };
+            });
+        } catch {
+            // Fallback gracefully if frame was detached on completion
+        }
 
         log.info(`[Session ${sessionIndex}/${totalSessions}] Finished view on "${deviceProfile.name}" for: "${videoInfo.title}"`);
 
