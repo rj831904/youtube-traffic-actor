@@ -1,20 +1,32 @@
 # YouTube Traffic & Video Viewer Actor
 
-A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, and Puppeteer-Extra Stealth to automate organic-style YouTube video viewing, dwell-time testing, and traffic generation.
+A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, and Puppeteer-Extra Stealth to automate organic-style YouTube video viewing, dwell-time testing, multi-device emulation, and traffic generation.
 
 ---
 
 ## 🚀 Key Features
 
-- 🎥 **Targeted YouTube Playback:** Plays watch URLs and shorts with automated play initiation.
-- 🥷 **Stealth Anti-Detection:** Uses `puppeteer-extra-plugin-stealth` and randomized viewport dimensions to prevent automated bot flagging.
-- 🍪 **Auto-Consent Handling:** Automatically detects and accepts YouTube/Google GDPR cookie prompts.
+- 📱 **Multi-Device Emulation:** Realistic device profiles across Desktop (Windows, macOS, Linux), Mobile (iPhone 14/15, Google Pixel 8, Samsung Galaxy S24), and Tablet (iPad Pro, Galaxy Tab).
+- 🎲 **Traffic Distribution:** Choose random distribution (mimicking real-world traffic: 50% mobile, 40% desktop, 10% tablet) or lock to specific devices/categories.
+- 🎥 **Targeted YouTube Playback:** Automatically handles desktop and mobile YouTube players, starting video playback without user gesture restrictions.
+- 🥷 **Stealth Anti-Detection:** Uses `puppeteer-extra-plugin-stealth`, native touch emulation on mobile, and authentic user agents to prevent automated bot flagging.
+- 🍪 **Auto-Consent Handling:** Automatically detects and accepts YouTube/Google GDPR cookie and "Before you continue" prompts.
 - ⚡ **Ad Handling:** Automatically clicks "Skip Ad" and closes overlay sponsor banners as soon as they become dismissible.
 - ⏱️ **Configurable Dwell Time:** Randomizes watch duration between configurable minimum and maximum thresholds.
-- 📉 **Low-Bandwidth Mode:** Automatically sets video playback quality to 144p (`tiny`) and mutes audio to minimize proxy bandwidth and CPU utilization.
-- 🖱️ **Human Micro-Interactions:** Performs subtle cursor gliding and small scrolls to emulate natural user activity.
+- 📉 **Low-Bandwidth Mode:** Automatically enforces 144p (`tiny`) video quality and mutes audio to minimize proxy bandwidth and CPU utilization.
+- 🖱️ **Human Micro-Interactions:** Performs subtle cursor gliding on desktop and realistic touchscreen taps/swipes on mobile.
 - 🌐 **Proxy Rotation:** Integrates natively with Apify Residential/Datacenter Proxies or custom proxy groups.
-- 📊 **Structured Dataset Output:** Records video metadata (title, channel, seconds played, timestamp) to the Apify dataset.
+- 📊 **Structured Dataset Output:** Records video metadata (title, channel, device profile, viewport, seconds played, timestamp) to the Apify dataset.
+
+---
+
+## 📱 Supported Devices
+
+| Category | Profiles Included |
+| :--- | :--- |
+| **Desktop** | Windows 11 (Chrome / Edge), macOS Sonoma (Safari / Chrome), Ubuntu Linux (Chrome) |
+| **Mobile** | Apple iPhone 15 Pro, iPhone 14, Google Pixel 8 Pro, Samsung Galaxy S24 Ultra |
+| **Tablet** | Apple iPad Pro 12.9 (iPadOS), Samsung Galaxy Tab S9 (Android) |
 
 ---
 
@@ -24,11 +36,13 @@ A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, 
 | :--- | :--- | :--- | :--- |
 | `videoUrls` | `Array<string>` | *(Required)* | List of YouTube video URLs to view. |
 | `viewsPerVideo` | `Integer` | `1` | Number of viewing sessions to run for each URL. |
+| `deviceType` | `String` | `"RANDOM"` | `"RANDOM"`, `"DESKTOP_ONLY"`, `"MOBILE_ONLY"`, `"TABLET_ONLY"`, or `"CUSTOM"`. |
+| `customDevice` | `String` | `"windows_chrome"` | Specific device profile when `deviceType` is set to `"CUSTOM"`. |
 | `watchDurationMin` | `Integer` | `45` | Minimum watch time in seconds. |
 | `watchDurationMax` | `Integer` | `90` | Maximum watch time in seconds (randomized per session). |
 | `playbackQuality` | `String` | `"tiny"` | Resolution: `"tiny"` (144p), `"small"` (240p), `"medium"` (360p), `"hd720"`. |
 | `muteAudio` | `Boolean` | `true` | Mutes audio for autoplay compliance and silent background runs. |
-| `enableInteractions` | `Boolean` | `true` | Simulates mouse moves, small scroll actions, and pop-up dismissals. |
+| `enableInteractions` | `Boolean` | `true` | Simulates mouse moves/touch taps and subtle scroll actions. |
 | `maxConcurrency` | `Integer` | `1` | Number of simultaneous browser instances. |
 | `proxyConfiguration`| `Object` | `{ "useApifyProxy": true }` | Proxy settings (Residential recommended for high view count). |
 
@@ -40,6 +54,7 @@ A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, 
     "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
   ],
   "viewsPerVideo": 5,
+  "deviceType": "RANDOM",
   "watchDurationMin": 60,
   "watchDurationMax": 120,
   "playbackQuality": "tiny",
@@ -66,17 +81,11 @@ npm start
 
 ### 2. Run with Apify CLI
 ```bash
-# Install Apify CLI globally if needed
-npm install -g apify-cli
-
-# Login to your Apify account
-apify login
-
 # Test run locally with Apify environment
-apify run
+npx apify-cli run
 
 # Push directly to your Apify Actor repository
-apify push
+npx apify-cli push
 ```
 
 ---
@@ -87,8 +96,9 @@ apify push
 youtube-traffic-actor/
 ├── .actor/
 │   ├── actor.json           # Actor configuration & metadata
-│   └── input_schema.json    # Interactive input form for Apify Console
+│   └── input_schema.json    # Interactive input form for Apify Console (with device options)
 ├── src/
+│   ├── devices.js           # Multi-device definitions & resolution logic
 │   └── main.js              # Core crawler, stealth, playback & interaction logic
 ├── Dockerfile               # Production container definition
 ├── package.json             # Dependencies and runtime scripts

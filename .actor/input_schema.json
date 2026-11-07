@@ -20,6 +20,60 @@
       "minimum": 1,
       "maximum": 500
     },
+    "deviceType": {
+      "title": "Device Emulation Type",
+      "type": "string",
+      "description": "Select device category to emulate or distribute traffic across.",
+      "default": "RANDOM",
+      "editor": "select",
+      "enum": [
+        "RANDOM",
+        "DESKTOP_ONLY",
+        "MOBILE_ONLY",
+        "TABLET_ONLY",
+        "CUSTOM"
+      ],
+      "enumTitles": [
+        "Random Distribution (50% Mobile, 40% Desktop, 10% Tablet)",
+        "Desktop Only (Windows, macOS, Linux)",
+        "Mobile Only (iPhone, Android)",
+        "Tablet Only (iPad, Galaxy Tab)",
+        "Custom Specific Device (Select below)"
+      ]
+    },
+    "customDevice": {
+      "title": "Specific Device (When Device Type = Custom)",
+      "type": "string",
+      "description": "Choose a specific device profile to use for all viewing sessions.",
+      "default": "windows_chrome",
+      "editor": "select",
+      "enum": [
+        "windows_chrome",
+        "windows_edge",
+        "mac_safari",
+        "mac_chrome",
+        "linux_chrome",
+        "iphone_15_pro",
+        "iphone_14",
+        "pixel_8_pro",
+        "samsung_s24",
+        "ipad_pro_12",
+        "samsung_tab_s9"
+      ],
+      "enumTitles": [
+        "Desktop: Windows 11 (Google Chrome)",
+        "Desktop: Windows 11 (Microsoft Edge)",
+        "Desktop: macOS Sonoma (Apple Safari)",
+        "Desktop: macOS Sonoma (Google Chrome)",
+        "Desktop: Ubuntu Linux (Google Chrome)",
+        "Mobile: Apple iPhone 15 Pro (Safari)",
+        "Mobile: Apple iPhone 14 (Safari)",
+        "Mobile: Google Pixel 8 Pro (Chrome)",
+        "Mobile: Samsung Galaxy S24 Ultra (Chrome)",
+        "Tablet: Apple iPad Pro 12.9 (Safari)",
+        "Tablet: Samsung Galaxy Tab S9 (Chrome)"
+      ]
+    },
     "watchDurationMin": {
       "title": "Min Watch Duration (Seconds)",
       "type": "integer",
@@ -64,7 +118,7 @@
     "enableInteractions": {
       "title": "Simulate Human Micro-Interactions",
       "type": "boolean",
-      "description": "Randomly perform subtle cursor movements, mini-scrolls, and viewport changes to emulate realistic user behavior.",
+      "description": "Randomly perform subtle cursor/touch movements, mini-scrolls, and viewport changes to emulate realistic user behavior.",
       "default": true
     },
     "maxConcurrency": {
