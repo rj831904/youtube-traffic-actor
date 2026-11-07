@@ -7,6 +7,13 @@ A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, 
 ## 🚀 Key Features
 
 - 📱 **Multi-Device Emulation:** Realistic device profiles across Desktop (Windows, macOS, Linux), Mobile (iPhone 14/15, Google Pixel 8, Samsung Galaxy S24), and Tablet (iPad Pro, Galaxy Tab).
+- 🧬 **Advanced Fingerprinting Evasion:** (`enableAdvancedFingerprinting`):
+  - Injects subtle 1-bit noise into HTML5 Canvas fingerprints (`toDataURL` / `getImageData`).
+  - Spoofs WebGL unmasked vendor & renderer to match device hardware (e.g., Apple M2/GPU on Mac/iOS, Qualcomm Adreno on Android, NVIDIA/Intel/AMD on Windows).
+  - Micro-variance injection in `AudioContext` channel dynamics.
+  - Aligns `navigator.hardwareConcurrency` and `navigator.deviceMemory` with simulated device specs.
+- 🔄 **Browser Per Proxy & Session Isolation:** (`browserPerProxy`):
+  - Retires browser after single page/session to prevent cross-session cookie, socket, or cache leakage between different proxy IPs.
 - 🎲 **Traffic Distribution:** Choose random distribution (mimicking real-world traffic: 50% mobile, 40% desktop, 10% tablet) or lock to specific devices/categories.
 - 🎥 **Targeted YouTube Playback:** Automatically handles desktop and mobile YouTube players, starting video playback without user gesture restrictions.
 - 🥷 **Stealth Anti-Detection:** Uses `puppeteer-extra-plugin-stealth`, native touch emulation on mobile, and authentic user agents to prevent automated bot flagging.
@@ -38,6 +45,8 @@ A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, 
 | `viewsPerVideo` | `Integer` | `1` | Number of viewing sessions to run for each URL. |
 | `deviceType` | `String` | `"RANDOM"` | `"RANDOM"`, `"DESKTOP_ONLY"`, `"MOBILE_ONLY"`, `"TABLET_ONLY"`, or `"CUSTOM"`. |
 | `customDevice` | `String` | `"windows_chrome"` | Specific device profile when `deviceType` is set to `"CUSTOM"`. |
+| `enableAdvancedFingerprinting` | `Boolean` | `true` | Spoofs Canvas, WebGL, AudioContext, and Hardware specs to match simulated devices. |
+| `browserPerProxy` | `Boolean` | `true` | Spawns a fresh browser process per proxy/view for total session isolation. |
 | `watchDurationMin` | `Integer` | `45` | Minimum watch time in seconds. |
 | `watchDurationMax` | `Integer` | `90` | Maximum watch time in seconds (randomized per session). |
 | `playbackQuality` | `String` | `"tiny"` | Resolution: `"tiny"` (144p), `"small"` (240p), `"medium"` (360p), `"hd720"`. |
@@ -45,28 +54,6 @@ A full-featured [Apify Actor](https://apify.com) built with Crawlee, Puppeteer, 
 | `enableInteractions` | `Boolean` | `true` | Simulates mouse moves/touch taps and subtle scroll actions. |
 | `maxConcurrency` | `Integer` | `1` | Number of simultaneous browser instances. |
 | `proxyConfiguration`| `Object` | `{ "useApifyProxy": true }` | Proxy settings (Residential recommended for high view count). |
-
-### Example Input JSON
-
-```json
-{
-  "videoUrls": [
-    "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-  ],
-  "viewsPerVideo": 5,
-  "deviceType": "RANDOM",
-  "watchDurationMin": 60,
-  "watchDurationMax": 120,
-  "playbackQuality": "tiny",
-  "muteAudio": true,
-  "enableInteractions": true,
-  "maxConcurrency": 2,
-  "proxyConfiguration": {
-    "useApifyProxy": true,
-    "apifyProxyGroups": ["RESIDENTIAL"]
-  }
-}
-```
 
 ---
 
@@ -96,9 +83,10 @@ npx apify-cli push
 youtube-traffic-actor/
 ├── .actor/
 │   ├── actor.json           # Actor configuration & metadata
-│   └── input_schema.json    # Interactive input form for Apify Console (with device options)
+│   └── input_schema.json    # Interactive input form for Apify Console (with device & fingerprint options)
 ├── src/
 │   ├── devices.js           # Multi-device definitions & resolution logic
+│   ├── fingerprint.js       # Advanced Canvas/WebGL/Audio/Hardware fingerprint evasion
 │   └── main.js              # Core crawler, stealth, playback & interaction logic
 ├── Dockerfile               # Production container definition
 ├── package.json             # Dependencies and runtime scripts

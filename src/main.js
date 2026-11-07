@@ -3,6 +3,7 @@ import { PuppeteerCrawler } from 'crawlee';
 import puppeteerExtra from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import { resolveDeviceProfile } from './devices.js';
+import { injectAdvancedFingerprint } from './fingerprint.js';
 
 // Initialize the stealth plugin to avoid anti-bot detection
 puppeteerExtra.use(StealthPlugin());
@@ -21,6 +22,8 @@ const {
     playbackQuality = 'tiny',
     muteAudio = true,
     enableInteractions = true,
+    enableAdvancedFingerprinting = true,
+    browserPerProxy = true,
     maxConcurrency = 1,
     proxyConfiguration: rawProxyConfig,
 } = input;
@@ -40,6 +43,8 @@ log.info('Starting YouTube Traffic & Viewer Actor', {
     playbackQuality,
     muteAudio,
     enableInteractions,
+    enableAdvancedFingerprinting,
+    browserPerProxy,
     maxConcurrency,
 });
 
@@ -84,8 +89,22 @@ const crawler = new PuppeteerCrawler({
     maxConcurrency,
     navigationTimeoutSecs: 60,
     requestHandlerTimeoutSecs: Math.max(300, watchDurationMax + 120),
+
+    // Browser per proxy & session isolation configuration
+    browserPoolOptions: {
+        maxOpenPagesPerBrowser: browserPerProxy ? 1 : 4,
+        retireBrowserAfterPageCount: browserPerProxy ? 1 : 20,
+    },
+    sessionPoolOptions: {
+        maxPoolSize: browserPerProxy ? 1 : 20,
+        sessionOptions: {
+            maxUsageCount: browserPerProxy ? 1 : 10,
+        },
+    },
+
     launchContext: {
         launcher: puppeteerExtra,
+        useIncognitoPages: true,
         launchOptions: {
             headless: true,
             args: [
@@ -100,18 +119,31 @@ const crawler = new PuppeteerCrawler({
             ],
         },
     },
+
+    preNavigationHooks: [
+        async ({ page, request }) => {
+            const { deviceProfile } = request.userData;
+            if (!deviceProfile) return;
+
+            // Apply device viewport and user-agent
+            await page.setUserAgent(deviceProfile.userAgent);
+            await page.setViewport(deviceProfile.viewport);
+
+            // Inject advanced fingerprint evasion before scripts execute
+            if (enableAdvancedFingerprinting) {
+                await injectAdvancedFingerprint(page, deviceProfile);
+            }
+        },
+    ],
+
     async requestHandler({ page, request }) {
         const { videoIndex, totalVideos, sessionIndex, totalSessions, targetDuration, deviceProfile } = request.userData;
         const currentUrl = request.url;
 
         log.info(
-            `[Video ${videoIndex}/${totalVideos} | Session ${sessionIndex}/${totalSessions}] Emulating: "${deviceProfile.name}" (${deviceProfile.category.toUpperCase()})`
+            `[Video ${videoIndex}/${totalVideos} | Session ${sessionIndex}/${totalSessions}] Device: "${deviceProfile.name}" (${deviceProfile.category.toUpperCase()})`
         );
         log.info(`Navigating to: ${currentUrl}`);
-
-        // Set device user-agent and viewport
-        await page.setUserAgent(deviceProfile.userAgent);
-        await page.setViewport(deviceProfile.viewport);
 
         // Handle Cookie & Consent dialogues
         try {
@@ -275,6 +307,8 @@ const crawler = new PuppeteerCrawler({
             device: deviceProfile.name,
             deviceCategory: deviceProfile.category,
             viewport: `${deviceProfile.viewport.width}x${deviceProfile.viewport.height}`,
+            advancedFingerprinting: enableAdvancedFingerprinting,
+            browserPerProxy,
             watchedSeconds: elapsedSeconds,
             targetDuration,
             videoCurrentTime: videoInfo.currentTime,

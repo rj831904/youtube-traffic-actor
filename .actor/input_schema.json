@@ -121,6 +121,18 @@
       "description": "Randomly perform subtle cursor/touch movements, mini-scrolls, and viewport changes to emulate realistic user behavior.",
       "default": true
     },
+    "enableAdvancedFingerprinting": {
+      "title": "Enable Advanced Fingerprinting Evasion",
+      "type": "boolean",
+      "description": "Spoofs Canvas, WebGL vendor/renderer, AudioContext dynamics, hardware concurrency, and client hints to match each simulated device.",
+      "default": true
+    },
+    "browserPerProxy": {
+      "title": "Browser per Proxy / Session Isolation",
+      "type": "boolean",
+      "description": "Launches a dedicated fresh browser instance per proxy and viewing session, eliminating cross-session cookie, socket, and cache leakage.",
+      "default": true
+    },
     "maxConcurrency": {
       "title": "Max Concurrency",
       "type": "integer",
