@@ -1,0 +1,91 @@
+{
+  "title": "YouTube Traffic & Viewer Actor Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "videoUrls": {
+      "title": "YouTube Video URLs",
+      "type": "array",
+      "description": "One or more YouTube video URLs to generate views for.",
+      "editor": "stringList",
+      "prefill": [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+      ]
+    },
+    "viewsPerVideo": {
+      "title": "Views per Video",
+      "type": "integer",
+      "description": "Number of viewing sessions to execute for each specified video URL.",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "watchDurationMin": {
+      "title": "Min Watch Duration (Seconds)",
+      "type": "integer",
+      "description": "Minimum dwell time in seconds to watch the video before ending session.",
+      "default": 45,
+      "minimum": 10,
+      "maximum": 3600
+    },
+    "watchDurationMax": {
+      "title": "Max Watch Duration (Seconds)",
+      "type": "integer",
+      "description": "Maximum dwell time in seconds to watch the video before ending session. Duration will be randomly chosen between Min and Max.",
+      "default": 90,
+      "minimum": 15,
+      "maximum": 3600
+    },
+    "playbackQuality": {
+      "title": "Playback Quality",
+      "type": "string",
+      "description": "Target video quality resolution. Lower qualities save significant proxy bandwidth and CPU memory.",
+      "default": "tiny",
+      "editor": "select",
+      "enum": [
+        "tiny",
+        "small",
+        "medium",
+        "hd720"
+      ],
+      "enumTitles": [
+        "144p (Tiny - Recommended for low bandwidth)",
+        "240p (Small)",
+        "360p (Medium)",
+        "720p (HD)"
+      ]
+    },
+    "muteAudio": {
+      "title": "Mute Audio",
+      "type": "boolean",
+      "description": "Mute video audio during playback to avoid sound and satisfy autoplay policies.",
+      "default": true
+    },
+    "enableInteractions": {
+      "title": "Simulate Human Micro-Interactions",
+      "type": "boolean",
+      "description": "Randomly perform subtle cursor movements, mini-scrolls, and viewport changes to emulate realistic user behavior.",
+      "default": true
+    },
+    "maxConcurrency": {
+      "title": "Max Concurrency",
+      "type": "integer",
+      "description": "Number of concurrent browser instances running simultaneously.",
+      "default": 1,
+      "minimum": 1,
+      "maximum": 10
+    },
+    "proxyConfiguration": {
+      "title": "Proxy Configuration",
+      "type": "object",
+      "description": "Proxy configuration for rotating IP addresses between runs and avoiding rate limits.",
+      "editor": "proxy",
+      "default": {
+        "useApifyProxy": true
+      }
+    }
+  },
+  "required": [
+    "videoUrls"
+  ]
+}

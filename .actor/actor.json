@@ -1,0 +1,12 @@
+{
+  "actorSpecification": 1,
+  "name": "youtube-traffic-generator",
+  "title": "YouTube Traffic & Video Viewer Actor",
+  "description": "Simulates organic YouTube video viewing with human-like interactions, stealth browser evasion, configurable dwell time, quality optimization, and proxy rotation.",
+  "version": "1.0",
+  "meta": {
+    "templateId": "project_empty"
+  },
+  "dockerfile": "./Dockerfile",
+  "input": "./input_schema.json"
+}

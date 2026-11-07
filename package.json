@@ -1,0 +1,20 @@
+{
+  "name": "youtube-traffic-actor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Apify Actor for automated YouTube video viewing, traffic generation, and playback engagement testing.",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "apify": "^3.2.0",
+    "crawlee": "^3.11.0",
+    "puppeteer": "^23.6.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "author": "Antigravity",
+  "license": "Apache-2.0"
+}
