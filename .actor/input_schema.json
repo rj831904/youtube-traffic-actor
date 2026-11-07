@@ -80,7 +80,7 @@
       "description": "Minimum dwell time in seconds to watch the video before ending session.",
       "default": 45,
       "minimum": 10,
-      "maximum": 3600
+      "maximum": 86400
     },
     "watchDurationMax": {
       "title": "Max Watch Duration (Seconds)",
@@ -88,7 +88,7 @@
       "description": "Maximum dwell time in seconds to watch the video before ending session. Duration will be randomly chosen between Min and Max.",
       "default": 90,
       "minimum": 15,
-      "maximum": 3600
+      "maximum": 86400
     },
     "playbackQuality": {
       "title": "Playback Quality",

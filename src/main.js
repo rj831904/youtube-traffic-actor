@@ -87,8 +87,8 @@ log.info(`Total viewing sessions queued: ${requests.length}`);
 const crawler = new PuppeteerCrawler({
     proxyConfiguration,
     maxConcurrency,
-    navigationTimeoutSecs: 60,
-    requestHandlerTimeoutSecs: Math.max(300, watchDurationMax + 120),
+    navigationTimeoutSecs: 90,
+    requestHandlerTimeoutSecs: Math.max(600, watchDurationMax + 300),
 
     // Browser per proxy & session isolation configuration
     browserPoolOptions: {
